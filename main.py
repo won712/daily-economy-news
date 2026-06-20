@@ -5,40 +5,119 @@ import sys
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
 from zoneinfo import ZoneInfo
 
 import requests
 
 
-RSS_FEEDS = {
-    "Global Market": [
-        "https://news.google.com/rss/search?q=US+stock+market+Federal+Reserve+Treasury+yields+dollar&hl=en-US&gl=US&ceid=US:en",
-    ],
-    "AI / Semiconductor": [
-        "https://news.google.com/rss/search?q=Nvidia+TSMC+Samsung+SK+Hynix+Micron+AI+semiconductor&hl=en-US&gl=US&ceid=US:en",
-    ],
-    "Energy / Oil": [
-        "https://news.google.com/rss/search?q=oil+prices+Brent+WTI+OPEC+Middle+East+Strait+of+Hormuz&hl=en-US&gl=US&ceid=US:en",
-    ],
-    "Crypto": [
-        "https://news.google.com/rss/search?q=Bitcoin+Ethereum+stablecoin+crypto+regulation+market&hl=en-US&gl=US&ceid=US:en",
-    ],
-    "Macro Data": [
-        "https://news.google.com/rss/search?q=CPI+PPI+jobs+GDP+retail+sales+FOMC+inflation&hl=en-US&gl=US&ceid=US:en",
-        "https://www.federalreserve.gov/feeds/press_monetary.xml",
-        "https://apps.bea.gov/rss/rss.xml",
-    ],
-}
+NEWS_WINDOW_HOURS = 6
+
+RSS_FEEDS = [
+    {
+        "section": "Global Market",
+        "source": "Reuters",
+        "url": "https://news.google.com/rss/search?q=site%3Areuters.com%20markets%20OR%20economy%20OR%20stocks%20OR%20Federal%20Reserve&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "Global Market",
+        "source": "CNBC",
+        "url": "https://news.google.com/rss/search?q=site%3Acnbc.com%20markets%20OR%20stocks%20OR%20economy%20OR%20investing&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "Global Market",
+        "source": "MarketWatch",
+        "url": "https://news.google.com/rss/search?q=site%3Amarketwatch.com%20markets%20OR%20stocks%20OR%20economy&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "Global Market",
+        "source": "Bloomberg",
+        "url": "https://news.google.com/rss/search?q=site%3Abloomberg.com%20markets%20OR%20economy%20OR%20stocks&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "Global Market",
+        "source": "Financial Times",
+        "url": "https://news.google.com/rss/search?q=site%3Aft.com%20markets%20OR%20economy%20OR%20central%20banks&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "Global Market",
+        "source": "Wall Street Journal",
+        "url": "https://news.google.com/rss/search?q=site%3Awsj.com%20markets%20OR%20economy%20OR%20stocks&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "AI / Semiconductor",
+        "source": "Reuters",
+        "url": "https://news.google.com/rss/search?q=site%3Areuters.com%20Nvidia%20OR%20TSMC%20OR%20semiconductor%20OR%20AI%20chips&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "AI / Semiconductor",
+        "source": "CNBC",
+        "url": "https://news.google.com/rss/search?q=site%3Acnbc.com%20Nvidia%20OR%20AI%20chips%20OR%20semiconductor%20OR%20TSMC&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "AI / Semiconductor",
+        "source": "Yahoo Finance",
+        "url": "https://news.google.com/rss/search?q=site%3Afinance.yahoo.com%20Nvidia%20OR%20AMD%20OR%20TSMC%20OR%20Micron%20OR%20semiconductor&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "AI / Semiconductor",
+        "source": "Seeking Alpha",
+        "url": "https://news.google.com/rss/search?q=site%3Aseekingalpha.com%20Nvidia%20OR%20AMD%20OR%20Broadcom%20OR%20semiconductor&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "Energy / Oil",
+        "source": "Reuters",
+        "url": "https://news.google.com/rss/search?q=site%3Areuters.com%20oil%20prices%20OR%20Brent%20OR%20WTI%20OR%20OPEC&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "Energy / Oil",
+        "source": "Investing.com",
+        "url": "https://news.google.com/rss/search?q=site%3Ainvesting.com%20oil%20OR%20Brent%20OR%20WTI%20OR%20OPEC%20OR%20commodities&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "Crypto",
+        "source": "Yahoo Finance",
+        "url": "https://news.google.com/rss/search?q=site%3Afinance.yahoo.com%20Bitcoin%20OR%20Ethereum%20OR%20crypto%20OR%20stablecoin&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "Crypto",
+        "source": "CNBC",
+        "url": "https://news.google.com/rss/search?q=site%3Acnbc.com%20Bitcoin%20OR%20Ethereum%20OR%20crypto%20OR%20stablecoin&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "Macro Data",
+        "source": "Reuters",
+        "url": "https://news.google.com/rss/search?q=site%3Areuters.com%20CPI%20OR%20PPI%20OR%20jobs%20OR%20GDP%20OR%20FOMC%20OR%20Fed&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "Macro Data",
+        "source": "Investing.com",
+        "url": "https://news.google.com/rss/search?q=site%3Ainvesting.com%20economic%20calendar%20OR%20CPI%20OR%20Fed%20OR%20dollar%20OR%20yields&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "Macro Data",
+        "source": "Federal Reserve",
+        "url": "https://www.federalreserve.gov/feeds/press_monetary.xml",
+    },
+    {
+        "section": "Macro Data",
+        "source": "BEA",
+        "url": "https://apps.bea.gov/rss/rss.xml",
+    },
+]
 
 TRUSTED_SOURCE_HINTS = (
     "Reuters",
     "CNBC",
-    "Yahoo Finance",
     "MarketWatch",
+    "Yahoo Finance",
+    "Investing.com",
+    "Seeking Alpha",
+    "Bloomberg",
     "Financial Times",
+    "Wall Street Journal",
     "Federal Reserve",
-    "BLS",
     "BEA",
 )
 
@@ -51,7 +130,7 @@ SECTION_LABELS = {
 }
 
 MAX_ITEMS_PER_SECTION = 5
-MAX_TOTAL_ITEMS = 22
+MAX_TOTAL_ITEMS = 24
 TELEGRAM_LIMIT = 4096
 
 
@@ -62,6 +141,7 @@ class NewsItem:
     source: str
     link: str
     published: str
+    published_at: datetime
 
 
 def require_env(name: str) -> str:
@@ -78,20 +158,37 @@ def normalize_title(title: str) -> str:
     return re.sub(r"\s+", " ", title).strip()
 
 
-def split_google_news_title(title: str) -> tuple[str, str]:
+def split_google_news_title(title: str, fallback_source: str) -> tuple[str, str]:
     title = html.unescape(title).strip()
     if " - " not in title:
-        return title, "Unknown"
+        return title, fallback_source
     headline, source = title.rsplit(" - ", 1)
-    return headline.strip(), source.strip()
+    return headline.strip(), source.strip() or fallback_source
 
 
-def infer_source(feed_url: str) -> str:
-    if "federalreserve.gov" in feed_url:
-        return "Federal Reserve"
-    if "bea.gov" in feed_url:
-        return "BEA"
-    return "Unknown"
+def parse_datetime(value: str) -> datetime | None:
+    if not value:
+        return None
+    try:
+        parsed = parsedate_to_datetime(value)
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        return parsed.astimezone(timezone.utc)
+    except (TypeError, ValueError):
+        return None
+
+
+def is_recent(published_at: datetime) -> bool:
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=NEWS_WINDOW_HOURS)
+    return published_at >= cutoff
+
+
+def item_text(item: ET.Element, names: list[str]) -> str:
+    for name in names:
+        value = item.findtext(name, default="").strip()
+        if value:
+            return value
+    return ""
 
 
 def fetch_rss(feed_url: str) -> list[dict[str, str]]:
@@ -107,9 +204,9 @@ def fetch_rss(feed_url: str) -> list[dict[str, str]]:
     for item in root.findall("./channel/item"):
         items.append(
             {
-                "title": item.findtext("title", default="").strip(),
-                "link": item.findtext("link", default="").strip(),
-                "published": item.findtext("pubDate", default="").strip(),
+                "title": item_text(item, ["title"]),
+                "link": item_text(item, ["link"]),
+                "published": item_text(item, ["pubDate", "date", "updated", "published"]),
             }
         )
     return items
@@ -119,47 +216,54 @@ def collect_news() -> list[NewsItem]:
     grouped: dict[str, list[NewsItem]] = defaultdict(list)
     seen_titles: set[str] = set()
 
-    for section, feeds in RSS_FEEDS.items():
-        for feed_url in feeds:
-            try:
-                raw_items = fetch_rss(feed_url)
-            except Exception as exc:
-                print(f"Skipping RSS feed after fetch error: {feed_url} ({exc})", file=sys.stderr)
+    for feed in RSS_FEEDS:
+        section = feed["section"]
+        feed_url = feed["url"]
+        fallback_source = feed["source"]
+        try:
+            raw_items = fetch_rss(feed_url)
+        except Exception as exc:
+            print(f"Skipping RSS feed after fetch error: {feed_url} ({exc})", file=sys.stderr)
+            continue
+
+        for raw_item in raw_items:
+            published_at = parse_datetime(raw_item["published"])
+            if published_at is None or not is_recent(published_at):
                 continue
 
-            for raw_item in raw_items:
-                if "news.google.com" in feed_url:
-                    headline, source = split_google_news_title(raw_item["title"])
-                else:
-                    headline = html.unescape(raw_item["title"]).strip()
-                    source = infer_source(feed_url)
+            if "news.google.com" in feed_url:
+                headline, source = split_google_news_title(raw_item["title"], fallback_source)
+            else:
+                headline = html.unescape(raw_item["title"]).strip()
+                source = fallback_source
 
-                normalized = normalize_title(headline)
-                if not headline or normalized in seen_titles:
-                    continue
+            normalized = normalize_title(headline)
+            if not headline or normalized in seen_titles:
+                continue
 
-                seen_titles.add(normalized)
-                grouped[section].append(
-                    NewsItem(
-                        section=section,
-                        title=headline,
-                        source=source,
-                        link=raw_item["link"],
-                        published=raw_item["published"],
-                    )
+            seen_titles.add(normalized)
+            grouped[section].append(
+                NewsItem(
+                    section=section,
+                    title=headline,
+                    source=source,
+                    link=raw_item["link"],
+                    published=raw_item["published"],
+                    published_at=published_at,
                 )
+            )
 
     selected: list[NewsItem] = []
-    for section, items in grouped.items():
-        selected.extend(rank_items(items)[:MAX_ITEMS_PER_SECTION])
+    for section in SECTION_LABELS:
+        selected.extend(rank_items(grouped.get(section, []))[:MAX_ITEMS_PER_SECTION])
 
-    return selected[:MAX_TOTAL_ITEMS]
+    return rank_items(selected)[:MAX_TOTAL_ITEMS]
 
 
 def rank_items(items: list[NewsItem]) -> list[NewsItem]:
-    def score(item: NewsItem) -> tuple[int, str]:
+    def score(item: NewsItem) -> tuple[int, datetime]:
         trusted = any(source in item.source for source in TRUSTED_SOURCE_HINTS)
-        return (1 if trusted else 0, item.published)
+        return (1 if trusted else 0, item.published_at)
 
     return sorted(items, key=score, reverse=True)
 
@@ -178,10 +282,23 @@ def why_it_matters(section: str) -> str:
     return "한국 투자자는 글로벌 자금 흐름과 업종별 영향을 함께 확인할 필요가 있습니다."
 
 
+def format_age(published_at: datetime) -> str:
+    delta = datetime.now(timezone.utc) - published_at
+    total_minutes = max(0, int(delta.total_seconds() // 60))
+    hours, minutes = divmod(total_minutes, 60)
+    if hours:
+        return f"{hours}시간 {minutes}분 전"
+    return f"{minutes}분 전"
+
+
 def build_briefing(items: list[NewsItem]) -> str:
-    today = datetime.now(ZoneInfo("Asia/Seoul")).strftime("%Y-%m-%d %H:%M KST")
+    now_kst = datetime.now(ZoneInfo("Asia/Seoul"))
+    today = now_kst.strftime("%Y-%m-%d %H:%M KST")
     if not items:
-        return f"해외 경제 뉴스 브리핑\n{today}\n\n오늘 수집된 해외 경제 뉴스가 없습니다."
+        return (
+            f"해외 경제 뉴스 브리핑\n{today}\n\n"
+            f"최근 {NEWS_WINDOW_HOURS}시간 이내 수집된 지정 소스 뉴스가 없습니다."
+        )
 
     grouped: dict[str, list[NewsItem]] = defaultdict(list)
     for item in items:
@@ -190,22 +307,21 @@ def build_briefing(items: list[NewsItem]) -> str:
     lines = [
         "해외 경제 뉴스 브리핑",
         today,
-        "",
-        "무료 RSS 기반 자동 브리핑입니다.",
+        f"최근 {NEWS_WINDOW_HOURS}시간 이내 뉴스만 선별",
         "",
     ]
 
-    for section in RSS_FEEDS:
+    for section in SECTION_LABELS:
         section_items = grouped.get(section, [])[:3]
         if not section_items:
             continue
 
-        lines.append(f"[{SECTION_LABELS.get(section, section)}]")
+        lines.append(f"[{SECTION_LABELS[section]}]")
         for idx, item in enumerate(section_items, start=1):
             lines.extend(
                 [
                     f"{idx}. {item.title}",
-                    f"Source: {item.source}",
+                    f"Source: {item.source} / {format_age(item.published_at)}",
                     f"Link: {item.link}",
                     f"Why it matters: {why_it_matters(item.section)}",
                     "",
@@ -218,7 +334,7 @@ def build_briefing(items: list[NewsItem]) -> str:
             "오늘 한국 시장에서는 반도체 대형주, 원달러 환율, 미국 금리 기대, 유가 민감 업종을 함께 확인하세요.",
             "",
             "[X Post Ideas]",
-            "1. 해외 뉴스 먼저 보면 한국 시장 대응 속도가 달라진다",
+            "1. 최근 6시간 해외 뉴스만 보면 장전 체크리스트가 훨씬 선명해진다",
             "2. 한국 증시는 미국 금리와 반도체 뉴스의 영향을 크게 받는다",
             "3. 유가와 환율은 한국 기업 실적을 볼 때 빠질 수 없는 변수다",
         ]
