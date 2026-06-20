@@ -2,7 +2,6 @@ import html
 import os
 import re
 import sys
-import textwrap
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from dataclasses import dataclass
@@ -10,7 +9,6 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import requests
-from openai import OpenAI
 
 
 RSS_FEEDS = {
@@ -135,9 +133,11 @@ def collect_news() -> list[NewsItem]:
                 else:
                     headline = html.unescape(raw_item["title"]).strip()
                     source = infer_source(feed_url)
+
                 normalized = normalize_title(headline)
                 if not headline or normalized in seen_titles:
                     continue
+
                 seen_titles.add(normalized)
                 grouped[section].append(
                     NewsItem(
@@ -164,72 +164,6 @@ def rank_items(items: list[NewsItem]) -> list[NewsItem]:
     return sorted(items, key=score, reverse=True)
 
 
-def build_prompt(items: list[NewsItem]) -> str:
-    today = datetime.now(ZoneInfo("Asia/Seoul")).strftime("%Y-%m-%d %H:%M KST")
-    source_lines = []
-    for idx, item in enumerate(items, start=1):
-        source_lines.append(
-            textwrap.dedent(
-                f"""
-                {idx}. Section: {item.section}
-                   Original English headline: {item.title}
-                   Source: {item.source}
-                   Published: {item.published}
-                   Link: {item.link}
-                """
-            ).strip()
-        )
-
-    return textwrap.dedent(
-        f"""
-        You are an overseas economy news analyst writing for Korean retail investors.
-
-        Create a concise Korean Telegram briefing using only the news items below.
-        Do not invent facts. Avoid clickbait, rumors, and unsupported certainty.
-        If an item is weak, repetitive, or not market-relevant, skip it.
-
-        Required output sections:
-        1. Global Market
-        2. AI / Semiconductor
-        3. Energy / Oil
-        4. Crypto
-        5. Macro Data
-        6. Korea Market Impact
-        7. X Post Ideas
-
-        For each selected news item, include:
-        - Korean summary
-        - Original English headline
-        - Source name
-        - Link
-        - Why it matters to Korean investors
-
-        Style:
-        - Write in Korean.
-        - Keep it useful for investment preparation, not sensational.
-        - Korea Market Impact should connect the news to Korean stocks, KRW/USD,
-          semiconductors, oil-sensitive sectors, and rates where relevant.
-        - X Post Ideas should be 3 short Korean post ideas.
-        - Keep the whole answer under 3,500 Korean characters.
-
-        Briefing time: {today}
-
-        News items:
-        {chr(10).join(source_lines)}
-        """
-    ).strip()
-
-
-def summarize_with_openai(openai_api_key: str, items: list[NewsItem]) -> str:
-    client = OpenAI(api_key=openai_api_key)
-    response = client.responses.create(
-        model=os.getenv("OPENAI_MODEL", "gpt-4.1-mini"),
-        input=build_prompt(items),
-        temperature=0.2,
-    )
-    return response.output_text.strip()
-
-
 def why_it_matters(section: str) -> str:
     if section == "Global Market":
         return "미국 증시, 금리, 달러 흐름은 한국 증시 외국인 수급과 환율에 직접 영향을 줍니다."
@@ -244,7 +178,7 @@ def why_it_matters(section: str) -> str:
     return "한국 투자자는 글로벌 자금 흐름과 업종별 영향을 함께 확인할 필요가 있습니다."
 
 
-def build_free_briefing(items: list[NewsItem]) -> str:
+def build_briefing(items: list[NewsItem]) -> str:
     today = datetime.now(ZoneInfo("Asia/Seoul")).strftime("%Y-%m-%d %H:%M KST")
     if not items:
         return f"해외 경제 뉴스 브리핑\n{today}\n\n오늘 수집된 해외 경제 뉴스가 없습니다."
@@ -257,7 +191,7 @@ def build_free_briefing(items: list[NewsItem]) -> str:
         "해외 경제 뉴스 브리핑",
         today,
         "",
-        "AI 요약 대신 무료 RSS 기반으로 생성한 브리핑입니다.",
+        "무료 RSS 기반 자동 브리핑입니다.",
         "",
     ]
 
@@ -265,6 +199,7 @@ def build_free_briefing(items: list[NewsItem]) -> str:
         section_items = grouped.get(section, [])[:3]
         if not section_items:
             continue
+
         lines.append(f"[{SECTION_LABELS.get(section, section)}]")
         for idx, item in enumerate(section_items, start=1):
             lines.extend(
@@ -289,19 +224,6 @@ def build_free_briefing(items: list[NewsItem]) -> str:
         ]
     )
     return "\n".join(lines).strip()
-
-
-def summarize_news(openai_api_key: str | None, items: list[NewsItem]) -> str:
-    if not items:
-        return "오늘 수집된 해외 경제 뉴스가 없습니다."
-    if not openai_api_key:
-        return build_free_briefing(items)
-
-    try:
-        return summarize_with_openai(openai_api_key, items)
-    except Exception as exc:
-        print(f"OpenAI summarization failed, using free RSS fallback: {exc}", file=sys.stderr)
-        return build_free_briefing(items)
 
 
 def split_for_telegram(text: str) -> list[str]:
@@ -352,12 +274,11 @@ def send_telegram_message(bot_token: str, chat_id: str, text: str) -> None:
 
 def main() -> int:
     try:
-        openai_api_key = os.getenv("OPENAI_API_KEY")
         bot_token = require_env("TELEGRAM_BOT_TOKEN")
         chat_id = require_env("TELEGRAM_CHAT_ID")
 
         news_items = collect_news()
-        briefing = summarize_news(openai_api_key, news_items)
+        briefing = build_briefing(news_items)
         send_telegram_message(bot_token, chat_id, briefing)
     except Exception as exc:
         print(f"Failed to send overseas economy briefing: {exc}", file=sys.stderr)
