@@ -16,9 +16,15 @@ The bot collects overseas market news through RSS feeds, asks OpenAI to summariz
 
 ## Required GitHub Actions secrets
 
-- `OPENAI_API_KEY`
-- `TELEGRAM_BOT_TOKEN`
-- `TELEGRAM_CHAT_ID`
+Add these in **Settings > Secrets and variables > Actions > Repository secrets**.
+
+| Secret name | Secret value |
+| --- | --- |
+| `OPENAI_API_KEY` | Your OpenAI API key |
+| `TELEGRAM_BOT_TOKEN` | Token from BotFather |
+| `TELEGRAM_CHAT_ID` | Your Telegram chat id number |
+
+Important: put the text on the left in the **Name** field, and put your real key/token/id in the **Secret** field.
 
 ## Run
 
