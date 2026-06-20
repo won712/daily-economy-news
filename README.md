@@ -1,10 +1,8 @@
 # Daily Economy News
 
-Overseas economic and financial news briefing bot for Korean investors.
+Free overseas economic and financial news briefing bot for Korean investors.
 
-The bot collects overseas market news through RSS feeds, groups it by investment theme, and sends the result to Telegram.
-
-If `OPENAI_API_KEY` is available and has quota, the bot asks OpenAI to create a Korean investor briefing. If the key is missing or quota is unavailable, the bot still sends a free RSS-based briefing without AI summarization.
+The bot collects overseas market news through RSS feeds, groups it by investment theme, and sends the result to Telegram. It does not use the OpenAI API, so no OpenAI key or API billing is required.
 
 ## Sections
 
@@ -24,9 +22,8 @@ Add these in **Settings > Secrets and variables > Actions > Repository secrets**
 | --- | --- | --- |
 | `TELEGRAM_BOT_TOKEN` | Required | Token from BotFather |
 | `TELEGRAM_CHAT_ID` | Required | Your Telegram chat id number |
-| `OPENAI_API_KEY` | Optional | Your OpenAI API key, only if you want AI summaries |
 
-Important: put the text on the left in the **Name** field, and put your real key/token/id in the **Secret** field.
+Important: put the text on the left in the **Name** field, and put your real token/id in the **Secret** field.
 
 ## Run
 
