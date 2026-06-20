@@ -2,6 +2,9 @@ name: Overseas economy briefing
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
   schedule:
     # 07:30 Korea Standard Time is 22:30 UTC on the previous day.
     - cron: "30 22 * * *"
