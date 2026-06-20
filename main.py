@@ -29,7 +29,6 @@ RSS_FEEDS = {
     "Macro Data": [
         "https://news.google.com/rss/search?q=CPI+PPI+jobs+GDP+retail+sales+FOMC+inflation&hl=en-US&gl=US&ceid=US:en",
         "https://www.federalreserve.gov/feeds/press_monetary.xml",
-        "https://www.bls.gov/feed/news_release/latest.rss",
         "https://apps.bea.gov/rss/rss.xml",
     ],
 }
@@ -45,8 +44,16 @@ TRUSTED_SOURCE_HINTS = (
     "BEA",
 )
 
-MAX_ITEMS_PER_SECTION = 6
-MAX_TOTAL_ITEMS = 25
+SECTION_LABELS = {
+    "Global Market": "글로벌 시장",
+    "AI / Semiconductor": "AI / 반도체",
+    "Energy / Oil": "에너지 / 유가",
+    "Crypto": "크립토",
+    "Macro Data": "매크로 지표",
+}
+
+MAX_ITEMS_PER_SECTION = 5
+MAX_TOTAL_ITEMS = 22
 TELEGRAM_LIMIT = 4096
 
 
@@ -84,8 +91,6 @@ def split_google_news_title(title: str) -> tuple[str, str]:
 def infer_source(feed_url: str) -> str:
     if "federalreserve.gov" in feed_url:
         return "Federal Reserve"
-    if "bls.gov" in feed_url:
-        return "BLS"
     if "bea.gov" in feed_url:
         return "BEA"
     return "Unknown"
@@ -215,10 +220,7 @@ def build_prompt(items: list[NewsItem]) -> str:
     ).strip()
 
 
-def summarize_news(openai_api_key: str, items: list[NewsItem]) -> str:
-    if not items:
-        return "오늘 수집된 해외 경제 뉴스가 없습니다."
-
+def summarize_with_openai(openai_api_key: str, items: list[NewsItem]) -> str:
     client = OpenAI(api_key=openai_api_key)
     response = client.responses.create(
         model=os.getenv("OPENAI_MODEL", "gpt-4.1-mini"),
@@ -226,6 +228,80 @@ def summarize_news(openai_api_key: str, items: list[NewsItem]) -> str:
         temperature=0.2,
     )
     return response.output_text.strip()
+
+
+def why_it_matters(section: str) -> str:
+    if section == "Global Market":
+        return "미국 증시, 금리, 달러 흐름은 한국 증시 외국인 수급과 환율에 직접 영향을 줍니다."
+    if section == "AI / Semiconductor":
+        return "AI와 반도체 뉴스는 삼성전자, SK하이닉스, HBM/장비주 투자심리에 연결됩니다."
+    if section == "Energy / Oil":
+        return "유가 변동은 한국의 물가, 원가 부담, 정유/화학/항공 업종에 영향을 줄 수 있습니다."
+    if section == "Crypto":
+        return "크립토 위험선호 변화는 성장주와 글로벌 유동성 심리를 볼 때 참고할 수 있습니다."
+    if section == "Macro Data":
+        return "물가, 고용, GDP, FOMC 관련 뉴스는 금리 기대와 원달러 환율에 영향을 줍니다."
+    return "한국 투자자는 글로벌 자금 흐름과 업종별 영향을 함께 확인할 필요가 있습니다."
+
+
+def build_free_briefing(items: list[NewsItem]) -> str:
+    today = datetime.now(ZoneInfo("Asia/Seoul")).strftime("%Y-%m-%d %H:%M KST")
+    if not items:
+        return f"해외 경제 뉴스 브리핑\n{today}\n\n오늘 수집된 해외 경제 뉴스가 없습니다."
+
+    grouped: dict[str, list[NewsItem]] = defaultdict(list)
+    for item in items:
+        grouped[item.section].append(item)
+
+    lines = [
+        "해외 경제 뉴스 브리핑",
+        today,
+        "",
+        "AI 요약 대신 무료 RSS 기반으로 생성한 브리핑입니다.",
+        "",
+    ]
+
+    for section in RSS_FEEDS:
+        section_items = grouped.get(section, [])[:3]
+        if not section_items:
+            continue
+        lines.append(f"[{SECTION_LABELS.get(section, section)}]")
+        for idx, item in enumerate(section_items, start=1):
+            lines.extend(
+                [
+                    f"{idx}. {item.title}",
+                    f"Source: {item.source}",
+                    f"Link: {item.link}",
+                    f"Why it matters: {why_it_matters(item.section)}",
+                    "",
+                ]
+            )
+
+    lines.extend(
+        [
+            "[Korea Market Impact]",
+            "오늘 한국 시장에서는 반도체 대형주, 원달러 환율, 미국 금리 기대, 유가 민감 업종을 함께 확인하세요.",
+            "",
+            "[X Post Ideas]",
+            "1. 해외 뉴스 먼저 보면 한국 시장 대응 속도가 달라진다",
+            "2. 한국 증시는 미국 금리와 반도체 뉴스의 영향을 크게 받는다",
+            "3. 유가와 환율은 한국 기업 실적을 볼 때 빠질 수 없는 변수다",
+        ]
+    )
+    return "\n".join(lines).strip()
+
+
+def summarize_news(openai_api_key: str | None, items: list[NewsItem]) -> str:
+    if not items:
+        return "오늘 수집된 해외 경제 뉴스가 없습니다."
+    if not openai_api_key:
+        return build_free_briefing(items)
+
+    try:
+        return summarize_with_openai(openai_api_key, items)
+    except Exception as exc:
+        print(f"OpenAI summarization failed, using free RSS fallback: {exc}", file=sys.stderr)
+        return build_free_briefing(items)
 
 
 def split_for_telegram(text: str) -> list[str]:
@@ -259,7 +335,7 @@ def send_telegram_message(bot_token: str, chat_id: str, text: str) -> None:
 
 def main() -> int:
     try:
-        openai_api_key = require_env("OPENAI_API_KEY")
+        openai_api_key = os.getenv("OPENAI_API_KEY")
         bot_token = require_env("TELEGRAM_BOT_TOKEN")
         chat_id = require_env("TELEGRAM_CHAT_ID")
 
