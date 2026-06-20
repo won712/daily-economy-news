@@ -2,7 +2,22 @@
 
 Free overseas economic and financial news briefing bot for Korean investors.
 
-The bot collects overseas market news through RSS feeds, groups it by investment theme, and sends the result to Telegram. It does not use the OpenAI API, so no OpenAI key or API billing is required.
+The bot collects overseas market news through public RSS feeds, keeps only items published within the last 6 hours, groups them by investment theme, and sends the result to Telegram. It does not use the OpenAI API, so no OpenAI key or API billing is required.
+
+## Sources
+
+The bot prioritizes these overseas finance and market sources through public RSS or Google News RSS `site:` searches:
+
+- Reuters
+- CNBC
+- MarketWatch
+- Yahoo Finance
+- Investing.com
+- Seeking Alpha
+- Bloomberg
+- Financial Times
+- The Wall Street Journal
+- Federal Reserve / BEA official updates
 
 ## Sections
 
@@ -13,6 +28,10 @@ The bot collects overseas market news through RSS feeds, groups it by investment
 - Macro Data
 - Korea Market Impact
 - X Post Ideas
+
+## Freshness Rule
+
+Only news with a published timestamp within the last 6 hours is included. Older items are skipped automatically.
 
 ## GitHub Actions secrets
 
