@@ -318,6 +318,19 @@ def split_for_telegram(text: str) -> list[str]:
     return chunks
 
 
+def explain_telegram_error(status_code: int) -> str:
+    if status_code == 403:
+        return (
+            "Telegram rejected the message with 403 Forbidden. Open your bot chat in Telegram, "
+            "press Start or send /start, then make sure TELEGRAM_CHAT_ID belongs to that same bot."
+        )
+    if status_code == 400:
+        return "Telegram rejected the chat id or message format. Check TELEGRAM_CHAT_ID."
+    if status_code == 401:
+        return "Telegram rejected the bot token. Check TELEGRAM_BOT_TOKEN."
+    return "Telegram rejected the request."
+
+
 def send_telegram_message(bot_token: str, chat_id: str, text: str) -> None:
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     for chunk in split_for_telegram(text):
@@ -330,7 +343,11 @@ def send_telegram_message(bot_token: str, chat_id: str, text: str) -> None:
             },
             timeout=20,
         )
-        response.raise_for_status()
+        if not response.ok:
+            raise RuntimeError(
+                f"{explain_telegram_error(response.status_code)} "
+                f"Status: {response.status_code}. Response: {response.text}"
+            )
 
 
 def main() -> int:
