@@ -16,104 +16,108 @@ NEWS_WINDOW_HOURS = 6
 
 RSS_FEEDS = [
     {
-        "section": "Global Market",
+        "section": "US Stock Market",
         "source": "Reuters",
-        "url": "https://news.google.com/rss/search?q=site%3Areuters.com%20markets%20OR%20economy%20OR%20stocks%20OR%20Federal%20Reserve&hl=en-US&gl=US&ceid=US:en",
+        "url": "https://news.google.com/rss/search?q=site%3Areuters.com%20%28stocks%20OR%20Wall%20Street%20OR%20Nasdaq%20OR%20S%26P%20500%20OR%20Fed%20OR%20earnings%29&hl=en-US&gl=US&ceid=US:en",
     },
     {
-        "section": "Global Market",
+        "section": "US Stock Market",
         "source": "CNBC",
-        "url": "https://news.google.com/rss/search?q=site%3Acnbc.com%20markets%20OR%20stocks%20OR%20economy%20OR%20investing&hl=en-US&gl=US&ceid=US:en",
+        "url": "https://news.google.com/rss/search?q=site%3Acnbc.com%20%28stocks%20OR%20markets%20OR%20Wall%20Street%20OR%20Nasdaq%20OR%20earnings%29&hl=en-US&gl=US&ceid=US:en",
     },
     {
-        "section": "Global Market",
+        "section": "US Stock Market",
         "source": "MarketWatch",
-        "url": "https://news.google.com/rss/search?q=site%3Amarketwatch.com%20markets%20OR%20stocks%20OR%20economy&hl=en-US&gl=US&ceid=US:en",
+        "url": "https://news.google.com/rss/search?q=site%3Amarketwatch.com%20%28stocks%20OR%20markets%20OR%20Wall%20Street%20OR%20Nasdaq%20OR%20Treasury%20yields%29&hl=en-US&gl=US&ceid=US:en",
     },
     {
-        "section": "Global Market",
+        "section": "US Stock Market",
+        "source": "Yahoo Finance",
+        "url": "https://news.google.com/rss/search?q=site%3Afinance.yahoo.com%20%28stocks%20OR%20markets%20OR%20earnings%20OR%20Nasdaq%20OR%20S%26P%20500%29&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "US Stock Market",
         "source": "Bloomberg",
-        "url": "https://news.google.com/rss/search?q=site%3Abloomberg.com%20markets%20OR%20economy%20OR%20stocks&hl=en-US&gl=US&ceid=US:en",
+        "url": "https://news.google.com/rss/search?q=site%3Abloomberg.com%20%28stocks%20OR%20markets%20OR%20Wall%20Street%20OR%20Treasury%20yields%29&hl=en-US&gl=US&ceid=US:en",
     },
     {
-        "section": "Global Market",
+        "section": "US Stock Market",
         "source": "Financial Times",
-        "url": "https://news.google.com/rss/search?q=site%3Aft.com%20markets%20OR%20economy%20OR%20central%20banks&hl=en-US&gl=US&ceid=US:en",
+        "url": "https://news.google.com/rss/search?q=site%3Aft.com%20%28markets%20OR%20stocks%20OR%20Wall%20Street%20OR%20central%20banks%29&hl=en-US&gl=US&ceid=US:en",
     },
     {
-        "section": "Global Market",
+        "section": "US Stock Market",
         "source": "Wall Street Journal",
-        "url": "https://news.google.com/rss/search?q=site%3Awsj.com%20markets%20OR%20economy%20OR%20stocks&hl=en-US&gl=US&ceid=US:en",
+        "url": "https://news.google.com/rss/search?q=site%3Awsj.com%20%28markets%20OR%20stocks%20OR%20Wall%20Street%20OR%20economy%29&hl=en-US&gl=US&ceid=US:en",
     },
     {
-        "section": "AI / Semiconductor",
+        "section": "AI",
         "source": "Reuters",
-        "url": "https://news.google.com/rss/search?q=site%3Areuters.com%20Nvidia%20OR%20TSMC%20OR%20semiconductor%20OR%20AI%20chips&hl=en-US&gl=US&ceid=US:en",
+        "url": "https://news.google.com/rss/search?q=site%3Areuters.com%20%28AI%20OR%20artificial%20intelligence%20OR%20Nvidia%20OR%20TSMC%20OR%20semiconductor%20OR%20chips%29&hl=en-US&gl=US&ceid=US:en",
     },
     {
-        "section": "AI / Semiconductor",
+        "section": "AI",
         "source": "CNBC",
-        "url": "https://news.google.com/rss/search?q=site%3Acnbc.com%20Nvidia%20OR%20AI%20chips%20OR%20semiconductor%20OR%20TSMC&hl=en-US&gl=US&ceid=US:en",
+        "url": "https://news.google.com/rss/search?q=site%3Acnbc.com%20%28AI%20OR%20artificial%20intelligence%20OR%20Nvidia%20OR%20semiconductor%20OR%20chips%29&hl=en-US&gl=US&ceid=US:en",
     },
     {
-        "section": "AI / Semiconductor",
+        "section": "AI",
         "source": "Yahoo Finance",
-        "url": "https://news.google.com/rss/search?q=site%3Afinance.yahoo.com%20Nvidia%20OR%20AMD%20OR%20TSMC%20OR%20Micron%20OR%20semiconductor&hl=en-US&gl=US&ceid=US:en",
+        "url": "https://news.google.com/rss/search?q=site%3Afinance.yahoo.com%20%28AI%20OR%20Nvidia%20OR%20AMD%20OR%20Broadcom%20OR%20TSMC%20OR%20Micron%20OR%20semiconductor%29&hl=en-US&gl=US&ceid=US:en",
     },
     {
-        "section": "AI / Semiconductor",
-        "source": "Seeking Alpha",
-        "url": "https://news.google.com/rss/search?q=site%3Aseekingalpha.com%20Nvidia%20OR%20AMD%20OR%20Broadcom%20OR%20semiconductor&hl=en-US&gl=US&ceid=US:en",
-    },
-    {
-        "section": "Energy / Oil",
-        "source": "Reuters",
-        "url": "https://news.google.com/rss/search?q=site%3Areuters.com%20oil%20prices%20OR%20Brent%20OR%20WTI%20OR%20OPEC&hl=en-US&gl=US&ceid=US:en",
-    },
-    {
-        "section": "Energy / Oil",
-        "source": "Investing.com",
-        "url": "https://news.google.com/rss/search?q=site%3Ainvesting.com%20oil%20OR%20Brent%20OR%20WTI%20OR%20OPEC%20OR%20commodities&hl=en-US&gl=US&ceid=US:en",
+        "section": "AI",
+        "source": "MarketWatch",
+        "url": "https://news.google.com/rss/search?q=site%3Amarketwatch.com%20%28AI%20OR%20Nvidia%20OR%20AMD%20OR%20semiconductor%20OR%20chips%29&hl=en-US&gl=US&ceid=US:en",
     },
     {
         "section": "Crypto",
-        "source": "Yahoo Finance",
-        "url": "https://news.google.com/rss/search?q=site%3Afinance.yahoo.com%20Bitcoin%20OR%20Ethereum%20OR%20crypto%20OR%20stablecoin&hl=en-US&gl=US&ceid=US:en",
+        "source": "Reuters",
+        "url": "https://news.google.com/rss/search?q=site%3Areuters.com%20%28Bitcoin%20OR%20Ethereum%20OR%20crypto%20OR%20stablecoin%20OR%20Coinbase%20OR%20ETF%29&hl=en-US&gl=US&ceid=US:en",
     },
     {
         "section": "Crypto",
         "source": "CNBC",
-        "url": "https://news.google.com/rss/search?q=site%3Acnbc.com%20Bitcoin%20OR%20Ethereum%20OR%20crypto%20OR%20stablecoin&hl=en-US&gl=US&ceid=US:en",
+        "url": "https://news.google.com/rss/search?q=site%3Acnbc.com%20%28Bitcoin%20OR%20Ethereum%20OR%20crypto%20OR%20stablecoin%20OR%20Coinbase%20OR%20ETF%29&hl=en-US&gl=US&ceid=US:en",
     },
     {
-        "section": "Macro Data",
+        "section": "Crypto",
+        "source": "Yahoo Finance",
+        "url": "https://news.google.com/rss/search?q=site%3Afinance.yahoo.com%20%28Bitcoin%20OR%20Ethereum%20OR%20crypto%20OR%20stablecoin%20OR%20Coinbase%20OR%20ETF%29&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "Crypto",
+        "source": "MarketWatch",
+        "url": "https://news.google.com/rss/search?q=site%3Amarketwatch.com%20%28Bitcoin%20OR%20Ethereum%20OR%20crypto%20OR%20stablecoin%20OR%20Coinbase%29&hl=en-US&gl=US&ceid=US:en",
+    },
+    {
+        "section": "Macro / Rates",
         "source": "Reuters",
-        "url": "https://news.google.com/rss/search?q=site%3Areuters.com%20CPI%20OR%20PPI%20OR%20jobs%20OR%20GDP%20OR%20FOMC%20OR%20Fed&hl=en-US&gl=US&ceid=US:en",
+        "url": "https://news.google.com/rss/search?q=site%3Areuters.com%20%28CPI%20OR%20PPI%20OR%20jobs%20OR%20GDP%20OR%20FOMC%20OR%20Fed%20OR%20Treasury%20yields%20OR%20dollar%29&hl=en-US&gl=US&ceid=US:en",
     },
     {
-        "section": "Macro Data",
+        "section": "Macro / Rates",
         "source": "Investing.com",
-        "url": "https://news.google.com/rss/search?q=site%3Ainvesting.com%20economic%20calendar%20OR%20CPI%20OR%20Fed%20OR%20dollar%20OR%20yields&hl=en-US&gl=US&ceid=US:en",
+        "url": "https://news.google.com/rss/search?q=site%3Ainvesting.com%20%28economic%20calendar%20OR%20CPI%20OR%20Fed%20OR%20dollar%20OR%20Treasury%20yields%20OR%20interest%20rates%29&hl=en-US&gl=US&ceid=US:en",
     },
     {
-        "section": "Macro Data",
+        "section": "Macro / Rates",
         "source": "Federal Reserve",
         "url": "https://www.federalreserve.gov/feeds/press_monetary.xml",
     },
     {
-        "section": "Macro Data",
+        "section": "Macro / Rates",
         "source": "BEA",
         "url": "https://apps.bea.gov/rss/rss.xml",
     },
 ]
 
-TRUSTED_SOURCE_HINTS = (
+TRUSTED_SOURCES = (
     "Reuters",
     "CNBC",
     "MarketWatch",
     "Yahoo Finance",
     "Investing.com",
-    "Seeking Alpha",
     "Bloomberg",
     "Financial Times",
     "Wall Street Journal",
@@ -122,11 +126,10 @@ TRUSTED_SOURCE_HINTS = (
 )
 
 SECTION_LABELS = {
-    "Global Market": "글로벌 시장",
-    "AI / Semiconductor": "AI / 반도체",
-    "Energy / Oil": "에너지 / 유가",
-    "Crypto": "크립토",
-    "Macro Data": "매크로 지표",
+    "US Stock Market": "미국주식 영향 뉴스",
+    "AI": "AI 뉴스",
+    "Crypto": "크립토 영향 뉴스",
+    "Macro / Rates": "매크로 / 금리 뉴스",
 }
 
 MAX_ITEMS_PER_SECTION = 5
@@ -212,6 +215,10 @@ def fetch_rss(feed_url: str) -> list[dict[str, str]]:
     return items
 
 
+def is_trusted_source(source: str, fallback_source: str) -> bool:
+    return any(trusted in source or trusted in fallback_source for trusted in TRUSTED_SOURCES)
+
+
 def collect_news() -> list[NewsItem]:
     grouped: dict[str, list[NewsItem]] = defaultdict(list)
     seen_titles: set[str] = set()
@@ -236,6 +243,9 @@ def collect_news() -> list[NewsItem]:
             else:
                 headline = html.unescape(raw_item["title"]).strip()
                 source = fallback_source
+
+            if not is_trusted_source(source, fallback_source):
+                continue
 
             normalized = normalize_title(headline)
             if not headline or normalized in seen_titles:
@@ -262,23 +272,21 @@ def collect_news() -> list[NewsItem]:
 
 def rank_items(items: list[NewsItem]) -> list[NewsItem]:
     def score(item: NewsItem) -> tuple[int, datetime]:
-        trusted = any(source in item.source for source in TRUSTED_SOURCE_HINTS)
-        return (1 if trusted else 0, item.published_at)
+        trusted = 1 if is_trusted_source(item.source, item.source) else 0
+        return (trusted, item.published_at)
 
     return sorted(items, key=score, reverse=True)
 
 
 def why_it_matters(section: str) -> str:
-    if section == "Global Market":
-        return "미국 증시, 금리, 달러 흐름은 한국 증시 외국인 수급과 환율에 직접 영향을 줍니다."
-    if section == "AI / Semiconductor":
-        return "AI와 반도체 뉴스는 삼성전자, SK하이닉스, HBM/장비주 투자심리에 연결됩니다."
-    if section == "Energy / Oil":
-        return "유가 변동은 한국의 물가, 원가 부담, 정유/화학/항공 업종에 영향을 줄 수 있습니다."
+    if section == "US Stock Market":
+        return "미국 증시, 실적, 금리, 달러 흐름은 한국 증시 외국인 수급과 성장주 투자심리에 직접 영향을 줍니다."
+    if section == "AI":
+        return "AI 뉴스는 엔비디아 밸류체인, 반도체 수요, 삼성전자와 SK하이닉스 투자심리에 연결됩니다."
     if section == "Crypto":
-        return "크립토 위험선호 변화는 성장주와 글로벌 유동성 심리를 볼 때 참고할 수 있습니다."
-    if section == "Macro Data":
-        return "물가, 고용, GDP, FOMC 관련 뉴스는 금리 기대와 원달러 환율에 영향을 줍니다."
+        return "크립토 뉴스는 위험자산 선호, 유동성 심리, 관련 미국 상장주와 성장주 분위기에 영향을 줄 수 있습니다."
+    if section == "Macro / Rates":
+        return "물가, 고용, GDP, FOMC, 금리 뉴스는 미국주식 밸류에이션과 원달러 환율에 영향을 줍니다."
     return "한국 투자자는 글로벌 자금 흐름과 업종별 영향을 함께 확인할 필요가 있습니다."
 
 
@@ -297,7 +305,7 @@ def build_briefing(items: list[NewsItem]) -> str:
     if not items:
         return (
             f"해외 경제 뉴스 브리핑\n{today}\n\n"
-            f"최근 {NEWS_WINDOW_HOURS}시간 이내 수집된 지정 소스 뉴스가 없습니다."
+            f"최근 {NEWS_WINDOW_HOURS}시간 이내 수집된 공신력 있는 지정 소스 뉴스가 없습니다."
         )
 
     grouped: dict[str, list[NewsItem]] = defaultdict(list)
@@ -307,7 +315,7 @@ def build_briefing(items: list[NewsItem]) -> str:
     lines = [
         "해외 경제 뉴스 브리핑",
         today,
-        f"최근 {NEWS_WINDOW_HOURS}시간 이내 뉴스만 선별",
+        f"원칙: 서울 07:30 / 최근 {NEWS_WINDOW_HOURS}시간 / 공신력 있는 해외 소스 / 미국주식·AI·크립토·매크로 중심",
         "",
     ]
 
@@ -331,12 +339,12 @@ def build_briefing(items: list[NewsItem]) -> str:
     lines.extend(
         [
             "[Korea Market Impact]",
-            "오늘 한국 시장에서는 반도체 대형주, 원달러 환율, 미국 금리 기대, 유가 민감 업종을 함께 확인하세요.",
+            "오늘 한국 시장에서는 미국주식 선물, 반도체 대형주, 원달러 환율, 미국 금리 기대, 크립토 위험선호를 함께 확인하세요.",
             "",
             "[X Post Ideas]",
-            "1. 최근 6시간 해외 뉴스만 보면 장전 체크리스트가 훨씬 선명해진다",
-            "2. 한국 증시는 미국 금리와 반도체 뉴스의 영향을 크게 받는다",
-            "3. 유가와 환율은 한국 기업 실적을 볼 때 빠질 수 없는 변수다",
+            "1. 최근 6시간 해외 뉴스만 봐도 장전 체크리스트가 선명해진다",
+            "2. 한국 증시는 결국 미국주식·AI·금리 뉴스의 영향을 크게 받는다",
+            "3. 크립토 위험선호는 성장주 분위기를 볼 때 같이 체크해야 한다",
         ]
     )
     return "\n".join(lines).strip()
