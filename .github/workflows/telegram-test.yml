@@ -6,8 +6,8 @@ on:
     branches:
       - main
   schedule:
-    - cron: "30 7 * * *"
-      timezone: "Asia/Seoul"
+    # 07:30 Asia/Seoul is 22:30 UTC on the previous day.
+    - cron: "30 22 * * *"
 
 jobs:
   send-briefing:
