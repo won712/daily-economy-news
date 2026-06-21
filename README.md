@@ -49,3 +49,5 @@ Important: put the text on the left in the **Name** field, and put your real tok
 Open the repository on GitHub, go to **Actions**, choose **Overseas economy briefing**, and click **Run workflow**.
 
 The workflow also runs every day at 7:30 AM Korea time.
+
+Last manual trigger: 2026-06-21 10:11 KST
